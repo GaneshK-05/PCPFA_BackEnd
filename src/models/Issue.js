@@ -37,6 +37,20 @@ const issueSchema = new mongoose.Schema(
       trim: true,
     },
 
+    // Mongoose ObjectId relationships (Phase 8)
+    project: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Project",
+    },
+    assignedTo: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+    },
+    reportedBy: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+    },
+
     // Current workflow status
     status: {
       type: String,

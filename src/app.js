@@ -2,6 +2,13 @@ import express from "express";
 
 import authRoutes from "./routes/authRoutes.js";
 import syncRoutes from "./routes/syncRoutes.js";
+import projectRoutes from "./routes/projectRoutes.js";
+import issueRoutes from "./routes/issueRoutes.js";
+import commentRoutes from "./routes/commentRoutes.js";
+import commentRoutesStandalone from "./routes/commentRoutesStandalone.js";
+import analyticsRoutes from "./routes/analyticsRoutes.js";
+import logRoutes from "./routes/logRoutes.js";
+import userRoutes from "./routes/userRoutes.js";
 
 import { notFound, errorHandler } from "./middleware/errorHandler.js";
 
@@ -61,6 +68,15 @@ app.use("/auth", authRoutes);
 
 // Sync routes
 app.use("/sync", syncRoutes);
+
+// Application API routes
+app.use("/api/projects", projectRoutes);
+app.use("/api/issues", issueRoutes);
+app.use("/api/issues/:issueId/comments", commentRoutes);
+app.use("/api/comments", commentRoutesStandalone);
+app.use("/api/analytics", analyticsRoutes);
+app.use("/api/issues/:issueId/logs", logRoutes);
+app.use("/api/users", userRoutes);
 
 app.use(notFound);
 

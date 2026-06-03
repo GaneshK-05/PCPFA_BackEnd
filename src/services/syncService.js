@@ -164,6 +164,10 @@ export const syncData = async (dataset = null) => {
     totalRejected   += stats.rejected;
   }
 
+  // Resolve ObjectId relationships after syncing
+  console.log("Resolving Mongoose ObjectID relationships...");
+  await resolveMongooseRelationships();
+
   return {
     success: true,
     totalFetched,
@@ -171,4 +175,113 @@ export const syncData = async (dataset = null) => {
     duplicates: totalDuplicates,
     rejected:   totalRejected,
   };
+};
+
+/**
+ * resolveMongooseRelationships
+ * Resolves all raw string IDs to MongoDB ObjectId references
+ */
+export const resolveMongooseRelationships = async () => {
+  try {
+    // 1. Resolve Issue relationships:
+    // - project (ref Project) from projectId (string)
+    // - reportedBy (ref User) from reporterId (string)
+    // - assignedTo (ref User) from Assignment
+    const issues = await Issue.find();
+    for (const issue of issues) {
+      let modified = false;
+
+      // Project reference
+      if (issue.projectId) {
+        const projectDoc = await Project.findOne({ projectId: issue.projectId });
+        if (projectDoc && (!issue.project || issue.project.toString() !== projectDoc._id.toString())) {
+          issue.project = projectDoc._id;
+          modified = true;
+        }
+      }
+
+      // Reporter reference
+      if (issue.reporterId) {
+        const reporterDoc = await User.findOne({ userId: issue.reporterId });
+        if (reporterDoc && (!issue.reportedBy || issue.reportedBy.toString() !== reporterDoc._id.toString())) {
+          issue.reportedBy = reporterDoc._id;
+          modified = true;
+        }
+      }
+
+      // Assigned user reference
+      const activeAssignment = await Assignment.findOne({ issueId: issue.issueId, status: "active" });
+      if (activeAssignment) {
+        const devDoc = await User.findOne({ userId: activeAssignment.userId });
+        if (devDoc && (!issue.assignedTo || issue.assignedTo.toString() !== devDoc._id.toString())) {
+          issue.assignedTo = devDoc._id;
+          modified = true;
+        }
+      }
+
+      if (modified) {
+        await issue.save();
+      }
+    }
+
+    // 2. Resolve Comment relationships:
+    // - issue (ref Issue) from issueId (string)
+    // - user (ref User) from userId (string)
+    const comments = await Comment.find();
+    for (const comment of comments) {
+      let modified = false;
+
+      if (comment.issueId) {
+        const issueDoc = await Issue.findOne({ issueId: comment.issueId });
+        if (issueDoc && (!comment.issue || comment.issue.toString() !== issueDoc._id.toString())) {
+          comment.issue = issueDoc._id;
+          modified = true;
+        }
+      }
+
+      if (comment.userId) {
+        const userDoc = await User.findOne({ userId: comment.userId });
+        if (userDoc && (!comment.user || comment.user.toString() !== userDoc._id.toString())) {
+          comment.user = userDoc._id;
+          modified = true;
+        }
+      }
+
+      if (modified) {
+        await comment.save();
+      }
+    }
+
+    // 3. Resolve ActivityLog relationships:
+    // - issue (ref Issue) from issueId (string)
+    // - user (ref User) from userId (string)
+    const logs = await ActivityLog.find();
+    for (const log of logs) {
+      let modified = false;
+
+      if (log.issueId) {
+        const issueDoc = await Issue.findOne({ issueId: log.issueId });
+        if (issueDoc && (!log.issue || log.issue.toString() !== issueDoc._id.toString())) {
+          log.issue = issueDoc._id;
+          modified = true;
+        }
+      }
+
+      if (log.userId) {
+        const userDoc = await User.findOne({ userId: log.userId });
+        if (userDoc && (!log.user || log.user.toString() !== userDoc._id.toString())) {
+          log.user = userDoc._id;
+          modified = true;
+        }
+      }
+
+      if (modified) {
+        await log.save();
+      }
+    }
+
+    console.log("Mongoose ObjectID relationships resolved successfully.");
+  } catch (error) {
+    console.error("Error resolving Mongoose relationships:", error.message);
+  }
 };

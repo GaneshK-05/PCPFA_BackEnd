@@ -62,8 +62,10 @@ export const register = async (req, res) => {
     res.status(201).json({
       success: true,
       message: "User registered successfully",
-      user: userResponse,
-      token,
+      data: {
+        user: userResponse,
+        token,
+      },
     });
   } catch (err) {
     console.error("Register error:", err);
@@ -132,8 +134,10 @@ export const login = async (req, res) => {
     res.status(200).json({
       success: true,
       message: "Login successful",
-      user: userResponse,
-      token,
+      data: {
+        user: userResponse,
+        token,
+      },
     });
   } catch (err) {
     console.error("Login error:", err);
@@ -162,14 +166,17 @@ export const getCurrentUser = async (req, res) => {
 
     res.status(200).json({
       success: true,
-      user: {
-        _id: user._id,
-        name: user.name,
-        email: user.email,
-        role: user.role,
-        isActive: user.isActive,
-        createdAt: user.createdAt,
-        updatedAt: user.updatedAt,
+      message: "User fetched successfully",
+      data: {
+        user: {
+          _id: user._id,
+          name: user.name,
+          email: user.email,
+          role: user.role,
+          isActive: user.isActive,
+          createdAt: user.createdAt,
+          updatedAt: user.updatedAt,
+        },
       },
     });
   } catch (err) {

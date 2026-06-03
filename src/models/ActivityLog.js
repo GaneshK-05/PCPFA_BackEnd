@@ -23,6 +23,16 @@ const activityLogSchema = new mongoose.Schema(
       trim: true,
     },
 
+    // Mongoose ObjectId relationships (Phase 8)
+    issue: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Issue",
+    },
+    user: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+    },
+
     // The action performed e.g. "created", "assigned", "status_changed"
     action: {
       type: String,

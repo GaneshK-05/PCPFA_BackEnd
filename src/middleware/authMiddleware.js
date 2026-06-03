@@ -1,7 +1,8 @@
 import jwt from "jsonwebtoken";
+import User from "../models/User.js";
 
 /**
- * Verify JWT token and attach user ID to request
+ * Verify JWT token and attach user ID and user object to request
  */
 export const authMiddleware = async (req, res, next) => {
   try {
@@ -16,6 +17,17 @@ export const authMiddleware = async (req, res, next) => {
 
     const decoded = jwt.verify(token, process.env.JWT_SECRET || "your-secret-key-change-in-env");
     req.userId = decoded.userId;
+
+    // Fetch and populate req.user for all protected routes
+    const user = await User.findById(decoded.userId);
+    if (!user) {
+      return res.status(401).json({
+        success: false,
+        message: "Session invalid. User not found.",
+      });
+    }
+
+    req.user = user;
     next();
   } catch (err) {
     console.error("Auth middleware error:", err.message);
@@ -32,24 +44,20 @@ export const authMiddleware = async (req, res, next) => {
 export const authorize = (allowedRoles) => {
   return async (req, res, next) => {
     try {
-      const User = (await import("../models/User.js")).default;
-      const user = await User.findById(req.userId);
-
-      if (!user) {
-        return res.status(404).json({
+      if (!req.user) {
+        return res.status(401).json({
           success: false,
-          message: "User not found",
+          message: "Authentication required",
         });
       }
 
-      if (!allowedRoles.includes(user.role)) {
+      if (!allowedRoles.includes(req.user.role)) {
         return res.status(403).json({
           success: false,
           message: `Access denied. Required roles: ${allowedRoles.join(", ")}`,
         });
       }
 
-      req.user = user;
       next();
     } catch (err) {
       console.error("Authorization error:", err);

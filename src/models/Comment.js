@@ -23,6 +23,16 @@ const commentSchema = new mongoose.Schema(
       trim: true,
     },
 
+    // Mongoose ObjectId relationships (Phase 8)
+    issue: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Issue",
+    },
+    user: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+    },
+
     // API field is message (not content)
     message: {
       type: String,

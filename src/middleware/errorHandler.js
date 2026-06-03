@@ -59,9 +59,6 @@ export const errorHandler = (err, req, res, next) => {
 
   return res.status(statusCode).json({
     success: false,
-    statusCode,
-    message,
-    ...(details && { details }),
-    ...(process.env.NODE_ENV !== "production" && { stack: err.stack }),
+    message: details ? `${message}: ${JSON.stringify(details)}` : message,
   });
 };
