@@ -39,7 +39,6 @@ const loadData = async () => {
 
     console.log(" Authentication successful. Fetching private dataset...");
 
-    // Step 2: Fetch private dataset using token
     const dataResponse = await axios.get(`${BASE_URL}${dataUrl}`, {
       headers: {
         Authorization: `Bearer ${token}`,
@@ -49,21 +48,17 @@ const loadData = async () => {
     dataset = dataResponse.data.data || dataResponse.data;
 
     console.log("Dataset fetched successfully from private API");
-    // Step 3: Connect to MongoDB
     await connectDB();
     console.log("Connected to MongoDB Atlas");
 
-    // Step 4: Sync data to MongoDB (validate, sanitize, and store)
     console.log("Syncing data to MongoDB...");
     await syncData(dataset);
     console.log("Data sync completed successfully");
 
-    // Step 5: Start server
     const server = app.listen(PORT, () => {
       console.log(`Server is running on http://localhost:${PORT}`);
     });
 
-    // Graceful shutdown
     const shutdown = async (signal) => {
       console.log(`\n  ${signal} received. Shutting down gracefully...`);
 

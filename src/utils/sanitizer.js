@@ -24,6 +24,7 @@ export const sanitizeUser = (record) => ({
   email:    safeLower(record.email),
   role:     safeEnum(record.role, "viewer"),
   isActive: record.isActive !== undefined ? Boolean(record.isActive) : true,
+  password: "password123", // Default password for synced users
 });
 
 export const sanitizeProject = (record) => ({

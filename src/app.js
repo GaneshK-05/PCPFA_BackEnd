@@ -1,5 +1,6 @@
 import express from "express";
 
+import authRoutes from "./routes/authRoutes.js";
 import syncRoutes from "./routes/syncRoutes.js";
 
 import { notFound, errorHandler } from "./middleware/errorHandler.js";
@@ -55,6 +56,10 @@ app.get("/favicon.ico", (req, res) => {
   res.status(204).send();
 });
 
+// Authentication routes
+app.use("/auth", authRoutes);
+
+// Sync routes
 app.use("/sync", syncRoutes);
 
 app.use(notFound);
